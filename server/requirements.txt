@@ -1,0 +1,11 @@
+numpy
+pandas
+tensorflow
+Pillow
+joblib
+scikit-learn
+flask
+flask-cors
+python-dotenv
+pefile
+Flask-SQLAlchemy

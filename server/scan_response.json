@@ -1,0 +1,34 @@
+{
+    "status":"success",
+    "result":"malware",
+    "data":{
+
+    "scan_details":{
+        "info":"Malicious Content Detected",
+        "malware_class": "Kelihos_ver1",
+        "malware_class_id": 7,
+        "malware_description": "Botnet Variant",
+        "threat_level":"high"
+    },
+    "behaviour":[
+        "Attempts to establish persistence on system startup",
+        "Collects sensitive information from the system",
+        "Communicates with command and control servers",
+        "May attempt to encrypt files for ransom"        
+    ],
+    "recommended_action":[
+        "Immediate deletion recommended. Do not open or execute this file.",
+        "Scan your system with a full antivirus scan to ensure no components were installed.",
+        "Update your antivirus definitions to the latest version.",
+        "Check other files from the same source for potential threats."
+    ],
+
+    "technical_details":{
+        "file_name":"0ACDbR5M3ZhBJajygTuf",
+        "file_size":"1.1 MB",
+        "file_type":"exe",
+        "sha_hash":"8a9f8e7d6c5b4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0",
+        "engine_version":"v12.5.302"
+    }
+    }
+}

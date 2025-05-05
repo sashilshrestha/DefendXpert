@@ -9,3 +9,4 @@ flask-cors
 python-dotenv
 pefile
 Flask-SQLAlchemy
+Flask-JWT-Extended

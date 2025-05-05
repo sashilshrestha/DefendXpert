@@ -14,3 +14,27 @@ class Malware(db.Model):
     malware_class = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.Text, nullable=False)
     threat_level = db.Column(db.String(20), nullable=False)
+    confidence = db.Column(db.Integer, nullable=False)
+    
+    @classmethod
+    def get_all(cls):
+        return cls.query.all()
+
+class MalwareConfidence(db.Model):
+    __tablename__ = 'malware_confidence'
+    id = db.Column(db.Integer, primary_key=True)
+    confidence = db.Column(db.Integer, nullable=False)
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(512), nullable=False)
+    role = db.Column(db.String(50), nullable=False)
+
+    def __repr__(self):
+        return f"<User {self.email}>"

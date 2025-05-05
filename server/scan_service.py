@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import hashlib
 import pefile
-from db.models import Malware, MalwareDetails
+from db.models import Malware, MalwareDetails, MalwareConfidence
 import random
 import json
 
@@ -115,3 +115,12 @@ def generate_indices(input):
     random.seed(input)
     numbers = [random.randint(1, 15) for _ in range(5)]
     return numbers
+
+
+def map_prediction(predicted_confidence, malware_class):
+    malware_confidence = MalwareConfidence.query.get(malware_class)
+    if(malware_confidence.confidence < predicted_confidence): # (threshold : 55, prediction: 72)
+        return False, malware_confidence.confidence # is malware
+    else:
+        return True, malware_confidence.confidence # not malware
+

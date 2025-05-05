@@ -13,13 +13,7 @@ const Navbar = () => {
         <div className="flex-none">
           <ul className="menu menu-horizontal px-1 text-white">
             <li>
-              <a>Home</a>
-            </li>
-            <li>
-              <a>Dashboard</a>
-            </li>
-            <li>
-              <a>Settings</a>
+              <Link to={'admin/model-training'}>Admin</Link>
             </li>
           </ul>
         </div>

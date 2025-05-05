@@ -103,8 +103,8 @@ def predict():
     base_name, _ = os.path.splitext(bytes_filename)
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    asm_path = os.path.join(base_dir, UPLOAD_FOLDER, f"{base_name}.asm")
-    bytes_path = os.path.join(base_dir, UPLOAD_FOLDER, f"{base_name}.bytes")
+    asm_path = os.path.join(base_dir, UPLOAD_FOLDER, f"{base_name}")
+    bytes_path = os.path.join(base_dir, UPLOAD_FOLDER, f"{base_name}")
 
     try:
         # save uploaded files

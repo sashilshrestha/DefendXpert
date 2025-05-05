@@ -59,7 +59,21 @@ def register():
         return jsonify({"status":"success","message": "user registered in system", "user_id": user['id'], "role": user['role'], "name":user['name']}), 200
     else:
         return jsonify({"status":"error","message": user['error_message']}), 401
-    
+
+
+# ________________________________________________ Admin _________________________________________________________ #
+
+def admin_required(fn):
+    @jwt_required()
+    def wrapper(*args, **kwargs):
+        claims = get_jwt()
+        if not claims.get("is_admin"):
+            return jsonify({"msg": "Admins only!"}), 403
+        return fn(*args, **kwargs)
+    wrapper.__name__ = fn.__name__
+    return wrapper
+# _________________________________________________________________________________________________________________ #
+
 
 @app.route('/admin/update-confidence', methods=['POST'])
 # @jwt_required()

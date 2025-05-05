@@ -9,10 +9,10 @@ import {
 } from 'lucide-react';
 
 
-export default function ScanComplete({ onScanAnother, resultData }) {
+export default function ScanComplete({ onScanAnother }) {
 
-  if (!resultData) 
-    return <p>Scan result not available.</p>;
+  // if (!resultData) 
+  //   return <p>Scan result not available.</p>;
   
 
   // This function would handle downloading the report

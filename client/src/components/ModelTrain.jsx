@@ -88,6 +88,37 @@ const ModelTrain = () => {
     }, 500);
   };
 
+  //_______________________________________________Training Model_______________________________________________//
+
+  // const startTraining = async () => {
+  //   if (files.length === 0) return;
+  
+  //   const formData = new FormData();
+  //   files.forEach((fileObj) => {
+  //     formData.append('files', fileObj.file);
+  //   });
+  //   formData.append('model_name', modelName); // you'll need to store this in state
+  
+  //   setIsTraining(true);
+  //   try {
+  //     const res = await fetch('/api/train', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
+  
+  //     if (!res.ok) throw new Error('Training failed');
+  //     const result = await res.json();
+  //     console.log('Training started:', result);
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     setIsTraining(false);
+  //   }
+  // };
+  
+
+  //____________________________________________________________________________________________________________//
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;

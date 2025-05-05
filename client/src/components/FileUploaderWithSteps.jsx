@@ -3,6 +3,10 @@ import { X, Upload } from 'lucide-react';
 import StepsProgress from './StepsProgress';
 import { useNavigate } from 'react-router';
 
+
+// Assuming you have a way to access the token, for example, from local storage
+// const getToken = () => localStorage.getItem('authToken'); // Replace with your actual token retrieval method
+const getToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0NjM3MjY5MywianRpIjoiYWI2NzIwZTItMmQ4Yi00MzEwLWE1Y2MtNTFhZjg4NjJiNDRhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjEiLCJuYmYiOjE3NDYzNzI2OTMsImNzcmYiOiIyZjM0NzNhYi02YjIzLTQ4NjUtYjk2NS1iNjk3NzY1OTQyZjYiLCJleHAiOjE3NDYzNzM1OTN9.SpxgaHWd-OOcNZcxo6UvHISgTpyVjsHPYrT6b2nxJ_Y"; 
 export default function FileUploadWithSteps() {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
@@ -89,48 +93,95 @@ export default function FileUploadWithSteps() {
     }
   };
 
-  const processFiles = () => {
+  // const processFiles = () => {
+  //   if (files.length === 0) return;
+
+  //   // Start the upload process (step 0)
+  //   setCurrentStep(0);
+
+  //   // Simulate upload progress
+  //   let progress = 0;
+  //   const uploadInterval = setInterval(() => {
+  //     progress += 5;
+  //     setUploadProgress(progress);
+
+  //     // Update files progress
+  //     setFiles((currentFiles) =>
+  //       currentFiles.map((file) => ({
+  //         ...file,
+  //         progress: progress,
+  //       }))
+  //     );
+
+  //     if (progress >= 100) {
+  //       clearInterval(uploadInterval);
+
+  //       // Move to scanning step
+  //       setTimeout(() => {
+  //         setCurrentStep(1);
+
+  //         // Simulate scanning step
+  //         setTimeout(() => {
+  //           // Move to analyzing step
+  //           setCurrentStep(2);
+
+  //           // Simulate analyzing step
+  //           setTimeout(() => {
+  //             // Complete the process
+  //             setCurrentStep(3);
+  //           }, 2000);
+  //         }, 2000);
+  //       }, 500);
+  //     }
+  //   }, 100);
+  // };
+
+  //_____________________________________Upload to Send Files to Flask___________________________________________//
+  const processFiles = async () => {
     if (files.length === 0) return;
+  
+    setCurrentStep(0); // Upload step
+    setUploadProgress(0);
 
-    // Start the upload process (step 0)
-    setCurrentStep(0);
-
-    // Simulate upload progress
-    let progress = 0;
-    const uploadInterval = setInterval(() => {
-      progress += 5;
-      setUploadProgress(progress);
-
-      // Update files progress
-      setFiles((currentFiles) =>
-        currentFiles.map((file) => ({
-          ...file,
-          progress: progress,
-        }))
-      );
-
-      if (progress >= 100) {
-        clearInterval(uploadInterval);
-
-        // Move to scanning step
-        setTimeout(() => {
-          setCurrentStep(1);
-
-          // Simulate scanning step
-          setTimeout(() => {
-            // Move to analyzing step
-            setCurrentStep(2);
-
-            // Simulate analyzing step
-            setTimeout(() => {
-              // Complete the process
-              setCurrentStep(3);
-            }, 2000);
-          }, 2000);
-        }, 500);
+    // const token = getToken; // Get the JWT
+  
+    for (const fileObj of files) {
+      const formData = new FormData();
+      console.log('Uploading file:', fileObj.file);
+      formData.append('file', fileObj.file);
+  
+      try {
+        const response = await fetch('http://localhost:5000/predict-pe', {
+          method: 'POST',
+          // headers: {
+          //   'Authorization': `Bearer ${token}`, // Include the JWT in the Authorization header
+          // }, 
+          body: formData,
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.statusText}`);
+        }
+  
+        const result = await response.json();
+        console.log('Scan result:', result);
+  
+        // You can handle the result here, e.g., update state or navigate
+        // For example, navigate to a results page with the data
+        navigate('/scan-complete', { state: { result } });
+  
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        // Handle error appropriately
       }
-    }, 100);
+    }
+  
+    // Update steps after processing
+    setCurrentStep(3); // Complete
   };
+  
+  //_____________________________________________________________________________________________________________________________//
+  
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';

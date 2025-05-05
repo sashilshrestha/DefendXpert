@@ -8,7 +8,13 @@ import {
   FileSearch,
 } from 'lucide-react';
 
-export default function ScanComplete({ onScanAnother }) {
+
+export default function ScanComplete({ onScanAnother, resultData }) {
+
+  if (!resultData) 
+    return <p>Scan result not available.</p>;
+  
+
   // This function would handle downloading the report
   const handleDownloadReport = () => {
     // Create a sample report content

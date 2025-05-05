@@ -62,7 +62,7 @@ def register():
     
 
 @app.route('/admin/update-confidence', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def update_confidence():
     data = request.get_json()
     if(update_confidence_score(data)):
@@ -72,13 +72,13 @@ def update_confidence():
     
 
 @app.route('/admin/confidence', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_confidence():
         return jsonify({"status":"success","message": "malware threshold confidence","confidence":get_threshold_confidence()}), 200
 
 
 @app.route('/predict-pe-test', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def predict_pe_test():
     file = request.files.get("file")
     if not file:
@@ -135,7 +135,7 @@ def predict_pe_test():
     return jsonify(result)
 
 @app.route('/predict', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def predict():
     asm_file = request.files.get("asm")
     bytes_file = request.files.get("bytes")
@@ -198,10 +198,13 @@ def predict():
 
 
 @app.route('/predict-pe', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def predict_pe():
 
     file = request.files.get("file")
+
+    print("FILES:", request.files)
+
     if not file:
         return jsonify({"status":"error","message": "PE file is required."}), 400
 

@@ -4,8 +4,8 @@ from datetime import datetime
 import json
 import os
 from dotenv import load_dotenv
-from db.models import db, MalwareDetails, Malware
-from db.constants import MALWARE_DETAILS, MALWARE_CLASSES, MALWARE_DESCRIPTIONS, MALWARE_THREAT_LEVELS
+from db.models import db, MalwareDetails, Malware, MalwareConfidence, User
+from db.constants import MALWARE_DETAILS, MALWARE_CLASSES, MALWARE_DESCRIPTIONS, MALWARE_THREAT_LEVELS, MALWARE_CONFIDENCE_SCORE,APPLICATION_USERS
 
 # load data from env 
 load_dotenv()
@@ -54,14 +54,46 @@ def initialize_db(app):
                 existing = Malware.query.filter_by(malware_class=malware_class).first()
                 if not existing:
                     description = MALWARE_DESCRIPTIONS.get(malware_id, "")
-                    threat_level = MALWARE_THREAT_LEVELS.get(malware_id, "low")  # Default to "low" if not found
+                    threat_level = MALWARE_THREAT_LEVELS.get(malware_id, "low")
+                    confidence = MALWARE_CONFIDENCE_SCORE.get(malware_id, 80)
                     new_malware = Malware(
                         id=malware_id,
                         malware_class=malware_class,
                         description=description,
-                        threat_level=threat_level
+                        threat_level=threat_level,
+                        confidence=confidence
                     )
                     db.session.add(new_malware)
+            db.session.commit()
+
+        if 'malware_confidence' not in inspector.get_table_names():
+            print("Creating 'malware_confidence' table")
+            db.create_all()
+
+            for key, value in MALWARE_CONFIDENCE_SCORE.items():
+                
+                entry = MalwareConfidence(
+                    id=key,
+                    confidence=value,
+                )
+                db.session.add(entry)
+            db.session.commit()
+
+        if 'users' not in inspector.get_table_names():
+            print("Creating 'users' table")
+            db.create_all()
+
+            for key, value in APPLICATION_USERS.items():
+                
+                entry = User(
+                    # id=key,
+                    first_name=value['first_name'],
+                    last_name=value['last_name'],
+                    email=value['email'],
+                    password_hash=value['password_hash'],
+                    role=value['role']
+                )
+                db.session.add(entry)
             db.session.commit()
 
         else:

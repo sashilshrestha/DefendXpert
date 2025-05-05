@@ -347,3 +347,39 @@ MALWARE_THREAT_LEVELS = {
     8: "low",          # Obfuscator.ACY
     9: "extreme"       # Gatak
 }
+
+MALWARE_CONFIDENCE_SCORE = {
+    1: 80,  # Ramnit
+    2: 80,  # Lollipop
+    3: 80,  # Kelihos_ver3
+    4: 80,  # Vundo
+    5: 80,  # Simda
+    6: 80,  # Tracur
+    7: 80,  # Kelihos_ver1
+    8: 80,  # Obfuscator.ACY
+    9: 80   # Gatak
+}
+
+APPLICATION_USERS = {
+    1: {
+        "role": "admin",
+        "first_name": "System",
+        "last_name": "Admin",
+        "email": "admin@defendxpert.com",
+        "password_hash": "scrypt:32768:8:1$B6vHNwH5DvyBg3zg$6d1cd169b75d91b9637d384953956a215821b1d57c348aeba03089a6a70261b57842bd979e73214c91d0c8343a720c667a82f121b24da270619507ea3f23a91b"
+    },
+    2: {
+        "role": "user",
+        "first_name": "Bina",
+        "last_name": "Kandel",
+        "email": "bina.kandel@defendxpert.com",
+        "password_hash": "scrypt:32768:8:1$sm2z0YuiVYaDPx56$d8e144a130b5402a8f2f48a9137aea46c7f3b7e42762327c916b5e77a918251ed672d8a427339c550f127871f8e4b3e8df9ac4c78bafb5def10ec059994c234c"
+    },
+    3: {
+        "role": "user",
+        "first_name": "Sashil",
+        "last_name": "Shrestha",
+        "email": "sashil.shrestha@defendxpert.com",
+        "password_hash": "scrypt:32768:8:1$AJOOmjoCZYEV3y5b$eed8e1bf64cb57bddc44ac9906ecc1338a98d70f5d1e977d9969c1ba87934e7c0e39bf2c302bd55de9741dd4d3278f7b3fe76378d12625ae59b5b8c7a8704dae"
+    }
+}

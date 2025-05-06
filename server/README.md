@@ -13,7 +13,7 @@ Backend server for PE-Malware Detection using Hybrid-ML Model
 Build the environment
 
     python -m venv venv
-    venv\Scripts\activate
+    DISASSEMBLER_PATH
 
 Install dependencies
 

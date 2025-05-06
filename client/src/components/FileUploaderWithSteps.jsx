@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { X, Upload } from 'lucide-react';
 import StepsProgress from './StepsProgress';
 import { useNavigate } from 'react-router';
@@ -9,129 +9,74 @@ export default function FileUploadWithSteps() {
   const [isDragging, setIsDragging] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    if (currentStep === 3) {
-      // Redirect to /scan-complete
-      navigate('/scan-complete');
-    }
-  }, [currentStep, navigate]);
-
-  // Step definitions
-  const steps = ['Upload', 'Scanning', 'Analyzing', 'Complete'];
-
-  const handleDragEnter = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    if (droppedFiles.length === 0) return;
-
-    addFiles(droppedFiles);
-  };
-
-  const handleFileInputChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      addFiles(Array.from(e.target.files));
-      // Reset the input value so the same file can be selected again
-      e.target.value = '';
-    }
-  };
-
+  // Only allow single file
   const addFiles = (newFiles) => {
-    const newFilesWithPreview = newFiles.map((file) => ({
+    const file = newFiles[0];
+    if (!file) return;
+    setFiles([{
       file,
       id: `${file.name}-${Date.now()}`,
       progress: 0,
-    }));
-
-    setFiles((prevFiles) => [...prevFiles, ...newFilesWithPreview]);
-    // Reset to upload step when new files are added
+    }]);
     setCurrentStep(0);
     setUploadProgress(0);
+    setError('');
   };
 
   const removeFile = (id) => {
-    setFiles((prevFiles) => prevFiles.filter((file) => file.id !== id));
-    if (files.length <= 1) {
-      // Reset steps if removing the last file
-      setCurrentStep(0);
-      setUploadProgress(0);
-    }
+    setFiles([]);
+    setCurrentStep(0);
+    setUploadProgress(0);
+    setError('');
   };
 
   const clearAllFiles = () => {
     setFiles([]);
     setCurrentStep(0);
     setUploadProgress(0);
+    setError('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const processFiles = () => {
-    if (files.length === 0) return;
-
-    // Start the upload process (step 0)
-    setCurrentStep(0);
-
-    // Simulate upload progress
-    let progress = 0;
-    const uploadInterval = setInterval(() => {
-      progress += 5;
-      setUploadProgress(progress);
-
-      // Update files progress
-      setFiles((currentFiles) =>
-        currentFiles.map((file) => ({
-          ...file,
-          progress: progress,
-        }))
-      );
-
-      if (progress >= 100) {
-        clearInterval(uploadInterval);
-
-        // Move to scanning step
-        setTimeout(() => {
-          setCurrentStep(1);
-
-          // Simulate scanning step
-          setTimeout(() => {
-            // Move to analyzing step
-            setCurrentStep(2);
-
-            // Simulate analyzing step
-            setTimeout(() => {
-              // Complete the process
-              setCurrentStep(3);
-            }, 2000);
-          }, 2000);
-        }, 500);
-      }
-    }, 100);
+  // Handle file input
+  const handleFileInputChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addFiles(Array.from(e.target.files));
+      e.target.value = '';
+    }
   };
 
+  // Drag and drop handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles.length === 0) return;
+    addFiles(droppedFiles);
+  };
+
+  // Format file size
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -146,16 +91,13 @@ export default function FileUploadWithSteps() {
     return filename.split('.').pop()?.toUpperCase() || '';
   };
 
-  // Get step status message
+  // Step status message
   const getStepStatusMessage = () => {
     switch (currentStep) {
       case 0:
-        // return `Uploading files... ${uploadProgress}%`;
-        return `${
-          uploadProgress > 0 ? `Uploading files... ${uploadProgress}%` : ''
-        }`;
+        return uploadProgress > 0 ? `Uploading file... ${uploadProgress}%` : '';
       case 1:
-        return 'Scanning files for viruses...';
+        return 'Scanning file for viruses...';
       case 2:
         return 'Analyzing file contents...';
       case 3:
@@ -165,6 +107,69 @@ export default function FileUploadWithSteps() {
     }
   };
 
+  // Upload and scan process
+  const processFiles = async () => {
+    if (files.length === 0) return;
+
+    setCurrentStep(0);
+    setUploadProgress(0);
+    setError('');
+
+    // Simulate upload progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      setUploadProgress(progress);
+      setFiles((currentFiles) =>
+        currentFiles.map((file) => ({
+          ...file,
+          progress: progress,
+        }))
+      );
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          setCurrentStep(1);
+          setTimeout(() => {
+            setCurrentStep(2);
+            // API call after simulated scanning/analyzing
+            callApi(files[0].file);
+          }, 1200);
+        }, 800);
+      }
+    }, 80);
+  };
+
+  // API call with fetch and FormData
+  const callApi = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/predict-pe', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to scan file');
+      }
+      const data = await response.json();
+      setCurrentStep(3);
+      // Pass API data to /scan-complete using navigation state
+      navigate('/scan-complete', { state: { scanResult: data } });
+    } catch (err) {
+      setError('Failed to scan file. Please try again.');
+      setCurrentStep(0);
+      setUploadProgress(0);
+    }
+  };
+
+  // Steps
+  const steps = ['Upload', 'Scanning', 'Analyzing', 'Complete'];
+
   return (
     <div className="card w-full">
       <div className="card-body mx-auto w-3xl">
@@ -172,21 +177,23 @@ export default function FileUploadWithSteps() {
           File Upload
         </h2>
 
-        {/* Steps Progress Indicator */}
         <StepsProgress currentStep={currentStep} steps={steps} />
 
-        {/* Status Message */}
+        {error && (
+          <div className="alert alert-error mt-2">
+            <span>{error}</span>
+          </div>
+        )}
+
         {files.length > 0 && currentStep >= 0 && uploadProgress > 0 && (
           <div
-            className={`alert ${
-              currentStep === 3 ? 'alert-success' : 'alert-info'
-            } mt-2`}
+            className={`alert ${currentStep === 3 ? 'alert-success' : 'alert-info'} mt-2`}
           >
             <span>{getStepStatusMessage()}</span>
           </div>
         )}
 
-        {/* Upload Area - Only show if in initial step or no files */}
+        {/* Upload Area */}
         {currentStep === 0 && uploadProgress === 0 && (
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300 mt-4 ${
@@ -202,17 +209,17 @@ export default function FileUploadWithSteps() {
               <Upload className="h-16 w-16 text-dxprimary" />
               <div>
                 <h3 className="text-lg font-semibold">
-                  Drag & Drop files here
+                  Drag & Drop a file here
                 </h3>
                 <p className="text-sm text-base-content/70 mt-1">
-                  or click to browse files
+                  or click to browse file
                 </p>
               </div>
               <input
                 type="file"
                 ref={fileInputRef}
                 className="hidden"
-                multiple
+                multiple={false}
                 onChange={handleFileInputChange}
               />
               <button
@@ -222,7 +229,7 @@ export default function FileUploadWithSteps() {
                   fileInputRef.current?.click();
                 }}
               >
-                Select Files
+                Select File
               </button>
             </div>
           </div>
@@ -231,7 +238,7 @@ export default function FileUploadWithSteps() {
         {/* File List */}
         {files.length > 0 && (
           <div className="mt-4">
-            <h3 className="font-semibold mb-2">Files</h3>
+            <h3 className="font-semibold mb-2">File</h3>
             <div className="rounded-lg bg-gray-100 p-4 max-h-[200px] overflow-y-auto">
               <div className="space-y-3">
                 {files.map((file) => (
@@ -274,20 +281,14 @@ export default function FileUploadWithSteps() {
         {/* Action Buttons */}
         <div className="card-actions justify-end mt-6">
           {currentStep === 0 && uploadProgress === 0 && (
-            <>
-              <button
-                className="btn btn-dxprimary"
-                disabled={files.length === 0}
-                onClick={processFiles}
-              >
-                Start Scanning
-              </button>
-              {/* <button className="btn btn-outline" onClick={clearAllFiles}>
-                Clear All
-              </button> */}
-            </>
+            <button
+              className="btn btn-dxprimary"
+              disabled={files.length === 0}
+              onClick={processFiles}
+            >
+              Start Scanning
+            </button>
           )}
-
           {currentStep === 3 && (
             <button className="btn btn-dxprimary" onClick={clearAllFiles}>
               Start New Upload

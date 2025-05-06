@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AlertTriangle,
   Shield,
@@ -8,81 +8,43 @@ import {
   Bug,
   WormIcon as Virus,
 } from 'lucide-react';
-
-const malwareData = [
-  {
-    confidence: 20,
-    description: 'Trojan Downloader',
-    id: 1,
-    malware_class: 'Ramnit',
-    threat_level: 'high',
-  },
-  {
-    confidence: 50,
-    description: 'Adware',
-    id: 2,
-    malware_class: 'Lollipop',
-    threat_level: 'intermediate',
-  },
-  {
-    confidence: 0,
-    description: 'Botnet Malware',
-    id: 3,
-    malware_class: 'Kelihos_ver3',
-    threat_level: 'high',
-  },
-  {
-    confidence: 90,
-    description: 'Spyware',
-    id: 4,
-    malware_class: 'Vundo',
-    threat_level: 'intermediate',
-  },
-  {
-    confidence: 0,
-    description: 'Worm',
-    id: 5,
-    malware_class: 'Simda',
-    threat_level: 'extreme',
-  },
-  {
-    confidence: 0,
-    description: 'Trojan Dropper',
-    id: 6,
-    malware_class: 'Tracur',
-    threat_level: 'intermediate',
-  },
-  {
-    confidence: 0,
-    description: 'Botnet Variant',
-    id: 7,
-    malware_class: 'Kelihos_ver1',
-    threat_level: 'high',
-  },
-  {
-    confidence: 0,
-    description: 'Obfuscation Tool',
-    id: 8,
-    malware_class: 'Obfuscator.ACY',
-    threat_level: 'low',
-  },
-  {
-    confidence: 0,
-    description: 'Backdoor Trojan',
-    id: 9,
-    malware_class: 'Gatak',
-    threat_level: 'extreme',
-  },
-];
+import { useLoading } from '../hooks/useLoading';
+import { useToast } from '../hooks/useToast';
+import Loader from '../components/Loader';
+import Toast from '../components/Toast';
 
 export default function ConfidenceLevel() {
-  const [selectedMalware, setSelectedMalware] = useState(malwareData[0]);
-  const [confidenceLevels, setConfidenceLevels] = useState(
-    malwareData.reduce((acc, item) => {
-      acc[item.id] = item.confidence;
-      return acc;
-    }, {})
-  );
+  const { loading, startLoading, stopLoading } = useLoading();
+  const { toast, showToast } = useToast();
+  const [debounceTimeout, setDebounceTimeout] = useState(null);
+  const [malwareData, setMalwareData] = useState([]);
+  const [selectedMalware, setSelectedMalware] = useState('1');
+  const [confidenceLevels, setConfidenceLevels] = useState({});
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    startLoading();
+    fetch('http://localhost:5000/admin/confidence', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setMalwareData(data.confidence);
+        setSelectedMalware(data.confidence[0]);
+        const levels = data.confidence.reduce((acc, item) => {
+          acc[item.id] = item.confidence;
+          return acc;
+        }, {});
+        setConfidenceLevels(levels);
+        stopLoading();
+      })
+      .catch((err) => {
+        console.error('Failed to fetch malware data:', err);
+        stopLoading();
+      });
+  }, []);
 
   const handleMalwareChange = (e) => {
     const selected = malwareData.find(
@@ -92,10 +54,24 @@ export default function ConfidenceLevel() {
   };
 
   const handleConfidenceChange = (value) => {
-    setConfidenceLevels({
-      ...confidenceLevels,
-      [selectedMalware.id]: value,
-    });
+    const id = selectedMalware.id;
+
+    // Update UI immediately
+    setConfidenceLevels((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+
+    // Debounce API call
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    const timeout = setTimeout(() => {
+      updateConfidenceToAPI(id, value);
+    }, 500); // delay in milliseconds
+
+    setDebounceTimeout(timeout);
   };
 
   const getThreatIcon = (threatLevel) => {
@@ -128,8 +104,40 @@ export default function ConfidenceLevel() {
     }
   };
 
+  const updateConfidenceToAPI = (id, value) => {
+    const token = localStorage.getItem('token');
+    startLoading();
+    fetch('http://localhost:5000/admin/update-confidence', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ [id]: value }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to update confidence');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log('Confidence updated successfully:', data);
+        stopLoading();
+        showToast('Confidence updated sucesfully', 'success');
+      })
+      .catch((err) => {
+        console.error('Error updating confidence:', err);
+      });
+  };
+
+  // if (!selectedMalware)
+  //   return <div className="p-4">No malware data found.</div>;
+
   return (
     <div className="card">
+      {loading && <Loader />}
+      <Toast toast={toast} />
       <div className="card-body">
         <h2 className="card-title mb-4">Malware Confidence Levels</h2>
 
@@ -141,7 +149,7 @@ export default function ConfidenceLevel() {
                   <span className="label-text">Select Malware Class</span>
                 </label>
                 <select
-                  className="select  bg-blue-100 select-bordered w-full"
+                  className="select bg-blue-100 select-bordered w-full"
                   value={selectedMalware.id}
                   onChange={handleMalwareChange}
                 >
@@ -165,10 +173,6 @@ export default function ConfidenceLevel() {
                     </div>
                   </div>
                 </div>
-
-                {/* <div className="badge badge-lg my-2 ${getThreatColor(selectedMalware.threat_level)}">
-            Threat Level: {selectedMalware.threat_level}
-          </div> */}
 
                 <div className="mt-4 flex flex-col">
                   <label className="label">
@@ -198,7 +202,7 @@ export default function ConfidenceLevel() {
             </div>
             <div className="col-span-6 overflow-x-auto">
               <table className="table w-full">
-                <thead className='bg-base-200 border-rounded-tr-lg'>
+                <thead className="bg-base-200 border-rounded-tr-lg">
                   <tr>
                     <th>ID</th>
                     <th>Malware Class</th>

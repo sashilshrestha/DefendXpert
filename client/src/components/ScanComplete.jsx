@@ -14,33 +14,73 @@ export default function ScanComplete({ onScanAnother }) {
   // if (!resultData) 
   //   return <p>Scan result not available.</p>;
   
+  //Getting scan data
+  const scanResult = JSON.parse(localStorage.getItem('scanResult'));
 
-  // This function would handle downloading the report
+  //Scan Result
+  const isMalicious = scanResult?.message !== 'benign';
+  const details = scanResult?.technical_details || {};
+  
+  const malwareDetails = scanResult?.scan_details || {};
+  
+
+
+  //__________________________New Report________________________________//
+
   const handleDownloadReport = () => {
-    // Create a sample report content
     const reportContent = `
 SCAN REPORT
 ===========
 Date: ${new Date().toLocaleString()}
 
-MALICIOUS CONTENT
-----------------
-Malware Type: Trojan
-Threat Level: High
-Detection Method: Signature-based and Behavioral Analysis
+STATUS
+------
+${scanResult.message.toUpperCase()}
+Confidence: ${scanResult.confidence}%
+Threshold: ${scanResult.threshold_confidence}%
 
-PREDICTED BEHAVIOR
+TECHNICAL DETAILS
 -----------------
-- Attempts to establish persistence on system startup
-- Collects sensitive information from the system
-- Communicates with command and control servers
-- May attempt to encrypt files for ransom
+File Name: ${details.file_name}
+File Size: ${details.file_size}
+File Type: ${details.file_type}
+SHA-256: ${details.sha_hash}
+Engine Version: ${details.engine_version}
 
 RECOMMENDED ACTION
-----------------
-Immediate deletion recommended. Do not open or execute this file.
-Scan your system with a full antivirus scan to ensure no components were installed.
+------------------
+${isMalicious ? 'Delete the file and scan the system with antivirus.' : 'No malicious content detected. File is safe.'}
     `.trim();
+
+    
+  //____________________________________________________________________________//
+
+//   // This function would handle downloading the report
+//   const handleDownloadReport = () => {
+//     // Create a sample report content
+//     const reportContent = `
+// SCAN REPORT
+// ===========
+// Date: ${new Date().toLocaleString()}
+
+// MALICIOUS CONTENT
+// ----------------
+// Malware Type: Trojan
+// Threat Level: High
+// Detection Method: Signature-based and Behavioral Analysis
+
+// PREDICTED BEHAVIOR
+// -----------------
+// - Attempts to establish persistence on system startup
+// - Collects sensitive information from the system
+// - Communicates with command and control servers
+// - May attempt to encrypt files for ransom
+
+// RECOMMENDED ACTION
+// ----------------
+// Immediate deletion recommended. Do not open or execute this file.
+// Scan your system with a full antivirus scan to ensure no components were installed.
+//     `.trim();
 
     // Create a blob and download it
     const blob = new Blob([reportContent], { type: 'text/plain' });
@@ -71,65 +111,61 @@ Scan your system with a full antivirus scan to ensure no components were install
 
             <div className="divider"></div>
 
-            {/* Malicious Content Section */}
-            <div className="bg-error/10 rounded-lg p-4 mb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <AlertTriangle className="h-6 w-6 text-error" />
+            {isMalicious ? (
+              <div className="bg-error/10 rounded-lg p-4 mb-4">
                 <h3 className="text-lg font-bold text-error">
                   Malicious Content Detected
                 </h3>
+                <p>
+                  This file was identified as <strong>{scanResult.message}</strong> with{' '}
+                  <strong>{scanResult.confidence}% confidence</strong>.
+                </p>
               </div>
-              <p className="pl-9">
-                This file contains malicious code identified as a{' '}
-                <span className="font-semibold">Trojan</span> with a{' '}
-                <span className="font-semibold">high threat level</span>. The
-                file has been quarantined to prevent any damage to your system.
-              </p>
-            </div>
+            ) : (
+              <div className="bg-success/10 rounded-lg p-4 mb-4">
+                <h3 className="text-lg font-bold text-success">No Threat Detected</h3>
+                <p>
+                  This file appears <strong>benign</strong> with{' '}
+                  <strong>{scanResult.confidence}% confidence</strong>. No action is
+                  needed.
+                </p>
+              </div>
+            )}
 
             {/* Predicted Behavior Section */}
-            <div className="bg-warning/10 rounded-lg p-4 mb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <FileWarning className="h-6 w-6 text-warning" />
-                <h3 className="text-lg font-bold text-warning">
-                  Predicted Behavior
-                </h3>
+            {isMalicious && scanResult.predicted_behaviour?.length > 0 && (
+              <div className="bg-warning/10 rounded-lg p-4 mb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <FileWarning className="h-6 w-6 text-warning" />
+                  <h3 className="text-lg font-bold text-warning">
+                    Predicted Behavior
+                  </h3>
+                </div>
+                <ul className="pl-9 list-disc ml-4 space-y-1">
+                  {scanResult.predicted_behaviour.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
               </div>
-              <ul className="pl-9 list-disc ml-4 space-y-1">
-                <li>Attempts to establish persistence on system startup</li>
-                <li>Collects sensitive information from the system</li>
-                <li>Communicates with command and control servers</li>
-                <li>May attempt to encrypt files for ransom</li>
-              </ul>
-            </div>
+            )}
 
             {/* Recommended Action Section */}
-            <div className="bg-info/10 rounded-lg p-4 mb-6">
-              <div className="flex items-center gap-3 mb-2">
-                <ShieldAlert className="h-6 w-6 text-info" />
-                <h3 className="text-lg font-bold text-info">
-                  Recommended Action
-                </h3>
+            {isMalicious && scanResult.recommended_action?.length > 0 && (
+              <div className="bg-info/10 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <ShieldAlert className="h-6 w-6 text-info" />
+                  <h3 className="text-lg font-bold text-info">
+                    Recommended Action
+                  </h3>
+                </div>
+                <ul className="pl-9 list-disc ml-4 space-y-1">
+                  {scanResult.recommended_action.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
               </div>
-              <ul className="pl-9 list-disc ml-4 space-y-1">
-                <li>
-                  <span className="font-semibold">
-                    Immediate deletion recommended.
-                  </span>{' '}
-                  Do not open or execute this file.
-                </li>
-                <li>
-                  Scan your system with a full antivirus scan to ensure no
-                  components were installed.
-                </li>
-                <li>
-                  Update your antivirus definitions to the latest version.
-                </li>
-                <li>
-                  Check other files from the same source for potential threats.
-                </li>
-              </ul>
-            </div>
+            )}
+
 
             {/* Technical Details Collapse */}
             <div className="collapse collapse-arrow bg-base-200 mb-6 text-white">
@@ -143,26 +179,35 @@ Scan your system with a full antivirus scan to ensure no components were install
                     <tbody>
                       <tr>
                         <td className="font-semibold">File Name</td>
-                        <td>malicious_document.pdf</td>
+                        <td>{details.file_name}</td>
                       </tr>
                       <tr>
                         <td className="font-semibold">File Size</td>
-                        <td>1.24 MB</td>
+                        <td>{details.file_size}</td>
                       </tr>
                       <tr>
                         <td className="font-semibold">File Type</td>
-                        <td>PDF (with embedded JavaScript)</td>
+                        <td>{details.file_size}</td>
                       </tr>
                       <tr>
                         <td className="font-semibold">SHA-256</td>
                         <td className="text-xs">
-                          8a9f8e7d6c5b4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0
+                        {details.sha_hash}
                         </td>
                       </tr>
-                      <tr>
-                        <td className="font-semibold">Detection Name</td>
-                        <td>Trojan.PDF.Dropper</td>
-                      </tr>
+
+                      {isMalicious ? (
+                        <tr>
+                          <td className="font-semibold">Detection Name</td>
+                          <td>{malwareDetails.malware_description}</td>
+                        </tr>
+                       ) : (
+                        <tr>
+                          <td className="font-semibold">Detection Name</td>
+                          <td>None</td>
+                        </tr>
+                        )}
+                        
                       <tr>
                         <td className="font-semibold">Detection Engine</td>
                         <td>v12.5.302</td>

@@ -168,7 +168,11 @@ export default function FileUploadWithSteps() {
   
         // You can handle the result here, e.g., update state or navigate
         // For example, navigate to a results page with the data
-        navigate('/scan-complete', { state: { result } });
+        // navigate('/scan-complete', { state: { result } });
+
+        //This might be temporary but it saves result locally
+        localStorage.setItem('scanResult', JSON.stringify(result));
+        navigate('/scan-complete');
   
       } catch (error) {
         console.error('Error uploading file:', error);

@@ -50,11 +50,6 @@ Scan your system with a full antivirus scan to ensure no components were install
 
   return (
     <>
-      <div className="shadow-md bg-dxprimary">
-        <div className="mx-auto max-w-7xl">
-          <Navbar />
-        </div>
-      </div>
       <div className="bg-base-500">
         <div className="mx-auto max-w-7xl">
           <div className="card-body">

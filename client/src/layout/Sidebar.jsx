@@ -1,5 +1,5 @@
 'use client';
-
+import Logo from '../assets/images/logo.png';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import {
@@ -10,17 +10,26 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { logout } from '../utils/logout';
 
 export default function Sidebar() {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const navigate = useNavigate();
+  const [activeItem, setActiveItem] = useState('confidence-level');
 
   const menuItems = [
     // { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'confidence-level', label: 'Confidence Level', icon: Settings },
     { id: 'model-training', label: 'Model Training', icon: Settings },
   ];
 
   const handleMenuClick = (id) => {
     setActiveItem(id);
+    navigate(`/admin/${id}`);
+  };
+
+  const handleLogout = () => {
+    logout(navigate);
   };
 
   return (
@@ -33,6 +42,7 @@ export default function Sidebar() {
           {/* Sidebar Header */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-base-200">
             <div className="flex items-center">
+              <img src={Logo} alt="" className="h-10" />
               <span className="text-xl font-bold ml-3">DefendXpert</span>
             </div>
           </div>
@@ -43,7 +53,11 @@ export default function Sidebar() {
               {menuItems.map((item) => (
                 <li key={item.id}>
                   <a
-                    className={activeItem === item.id ? 'active' : ''}
+                    className={
+                      activeItem === item.id
+                        ? 'active bg-blue-400 text-dxprimary'
+                        : ''
+                    }
                     onClick={() => handleMenuClick(item.id)}
                   >
                     <item.icon size={18} />
@@ -62,7 +76,7 @@ export default function Sidebar() {
           {/* Sidebar Footer */}
           <div className="p-4 border-t border-base-200">
             <ul className="menu menu-md gap-2 w-full">
-              <li>
+              <li onClick={handleLogout}>
                 <Link className="text-error" to="/">
                   <LogOut size={18} />
                   Logout

@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 import json
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from dotenv import load_dotenv
+from datetime import timedelta
 
 
 app = Flask(__name__)
@@ -41,6 +42,11 @@ os.makedirs(TEMP_FOLDER, exist_ok=True)
 load_dotenv()
 
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+
+hours_str = os.getenv('LOGIN_VALIDITY_HOURS', '1')  # default to '1' hour if not set
+hours = int(hours_str)
+
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=hours)
 jwt = JWTManager(app)
 
 @app.route('/login', methods=['POST'])

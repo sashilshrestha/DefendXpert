@@ -381,5 +381,64 @@ APPLICATION_USERS = {
         "last_name": "Shrestha",
         "email": "sashil.shrestha@defendxpert.com",
         "password_hash": "scrypt:32768:8:1$AJOOmjoCZYEV3y5b$eed8e1bf64cb57bddc44ac9906ecc1338a98d70f5d1e977d9969c1ba87934e7c0e39bf2c302bd55de9741dd4d3278f7b3fe76378d12625ae59b5b8c7a8704dae"
+    },
+    4: {
+        "role": "user",
+        "first_name": "Radu",
+        "last_name": "Cojocaru",
+        "email": "radu.cojocaru@defendxpert.com",
+        "password_hash": "scrypt:32768:8:1$A3prgZIWb2gy5XSD$ba64dd3c797840aaf4f8f4c6ca102f3d04e84e697f9b6800e0671452d94541206674662b11b6d71a9972f38aaf27f89ba8cba62c1b097686a2294d7624f7cb19"
+    },
+    5: {
+        "role": "user",
+        "first_name": "Owais",
+        "last_name": "Saeed",
+        "email": "owais.saeed@emailshield.com",
+        "password_hash": "scrypt:32768:8:1$Dml81qmJv1sWUoSc$acf87b45aba00bda860c5d857c2b3d75a47b007e91b4d44bf7ad0f7d1b3422e30555464b0adde6460e7d62f41319af3c4680aa87f3a763ce234612b96e87a9d8"
+    },
+    6: {
+        "role": "user",
+        "first_name": "Noarin",
+        "last_name": "Panjwani",
+        "email": "noarin.panjwani@emailshield.com",
+        "password_hash": "scrypt:32768:8:1$FUaSLHrQ6M0yCS2r$ba6cc4c2341f155cdbe7a2b569154050bd440f0a6f26c001f71ef55bf9651835812af2b7924aaa2d819cb7dc34ee559cb2166c5fcffa253ac25d2970c0397313"
     }
+}
+
+FEEDBACK = {
+    1:{
+        "user_id":4,
+        "malware_id":2,
+        "confidence": 90,
+        "is_prediction_helpful":True,
+        "threshold_at_prediction":80
+    },
+    2:{
+        "user_id":3,
+        "malware_id":5,
+        "confidence": 95,
+        "is_prediction_helpful":True,
+        "threshold_at_prediction":80
+    },    
+    3:{
+        "user_id":2,
+        "malware_id":1,
+        "confidence": 70,
+        "is_prediction_helpful":False,
+        "threshold_at_prediction":80
+    },    
+    4:{
+        "user_id":5,
+        "malware_id":9,
+        "confidence": 93,
+        "is_prediction_helpful":True,
+        "threshold_at_prediction":80
+    },
+    5:{
+        "user_id":6,
+        "malware_id":8,
+        "confidence": 79,
+        "is_prediction_helpful":False,
+        "threshold_at_prediction":80
+    },
 }

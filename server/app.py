@@ -8,7 +8,7 @@ from tensorflow.keras.models import load_model
 from utils import bytes_to_image_array, extract_asm_features, extract_asm_file, extract_bytes_file, extract_bytes_asm_files
 from scan_service import extract_metadata, get_scan_details,extract_metadata_ams_bytes, get_predicted_behaviour, map_prediction
 from user_service import check_user_login, register_user
-from model_service import get_threshold_confidence,update_confidence_score, user_feedback,get_saved_feedbacks
+from model_service import get_threshold_confidence,update_confidence_score, user_feedback,get_saved_feedbacks,recommended_threshold
 from db import get_db, initialize_db
 from db.models import Malware
 from werkzeug.utils import secure_filename
@@ -95,9 +95,15 @@ def save_feedback():
 
 @app.route('/user-feedback', methods=['GET'])
 @jwt_required()
-def get_recommended_threshold():
+def get_feedbacks():
     feedback = get_saved_feedbacks()
     return jsonify({"status":"success","message": "user feedbacks","data":feedback}), 200
+
+@app.route('/threshold-recommendation', methods=['GET'])
+@jwt_required()
+def get_recommended_threshold():
+    thresholds = recommended_threshold()
+    return jsonify({"status":"success","message": "recommended threshold","data":thresholds}), 200
 
 
 @app.route('/predict-pe-test', methods=['POST'])

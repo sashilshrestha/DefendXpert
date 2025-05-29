@@ -41,7 +41,7 @@ class User(db.Model):
     
 
 class MalwareFeedback(db.Model):
-    __tablename__ = 'malware_feedback'
+    _tablename_ = 'malware_feedback'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
@@ -53,3 +53,38 @@ class MalwareFeedback(db.Model):
     @classmethod
     def get_all(cls):
         return cls.query.all()
+        
+
+    @classmethod
+    def get_last_two_thresholds(cls, malware_id):
+        # Get all rows for this malware_id, ordered by id
+        all_rows = cls.query.filter_by(malware_id=malware_id).order_by(cls.id).all()
+        if not all_rows:
+            return [], False  # Or handle as you wish
+
+        # Get unique thresholds in order of first appearance
+        seen = set()
+        unique_thresholds = []
+        for row in all_rows:
+            if row.threshold_at_prediction not in seen:
+                seen.add(row.threshold_at_prediction)
+                unique_thresholds.append(row.threshold_at_prediction)
+
+        if len(unique_thresholds) < 2:
+            return [], False  # Not enough thresholds
+
+        # Count rows for the last threshold
+        last_threshold = unique_thresholds[-1]
+        count_last = cls.query.filter_by(
+            malware_id=malware_id,
+            threshold_at_prediction=last_threshold
+        ).count()
+
+        if count_last >= 10:
+            # Return last two thresholds and True
+            return unique_thresholds[-2:], True
+        else:
+            if len(unique_thresholds) < 3:
+                return [], False  # Not enough thresholds if we need to skip the last
+            # Return the two before the last and False
+            return unique_thresholds[-3:-1], False

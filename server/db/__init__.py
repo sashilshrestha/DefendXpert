@@ -1,3 +1,4 @@
+import random
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
 from datetime import datetime
@@ -99,10 +100,40 @@ def initialize_db(app):
         if 'malware_feedback' not in inspector.get_table_names():
             print("Creating 'malware_feedback' table")
             db.create_all()
-            for key, value in FEEDBACK.items():
+            # for key, value in FEEDBACK.items():
                 
+            #     entry = MalwareFeedback(
+            #         # id=key,
+            #         user_id=value['user_id'],
+            #         malware_id=value['malware_id'],
+            #         confidence=value['confidence'],
+            #         is_prediction_helpful=value['is_prediction_helpful'],
+            #         threshold_at_prediction=value['threshold_at_prediction']
+            #     )
+            #     db.session.add(entry)
+            # db.session.commit()
+
+
+            user_id = 4
+            malware_thresholds = {
+                                1: [80, 85],
+                                2: [81, 70],
+                                3: [82, 75],
+                                4: [85, 79],
+                                5: [70, 77],
+                                6: [75, 80],
+                                7: [79, 81],
+                                8: [77, 82],
+                                9: [80, 79]
+                            }
+
+            malware_ids = range(1, 10)  # 2, 3, ..., 9
+            thresholds_list = [80, 81, 82, 85, 70, 75, 79, 77]  # Include 80 and other thresholds
+            FEEDBACK_DATA = generate_feedback_data(user_id, malware_thresholds, entries_per_threshold=20)
+            
+             # Insert your existing FEEDBACK data (if any)
+            for key, value in FEEDBACK.items():  # FEEDBACK is your original data
                 entry = MalwareFeedback(
-                    # id=key,
                     user_id=value['user_id'],
                     malware_id=value['malware_id'],
                     confidence=value['confidence'],
@@ -110,7 +141,35 @@ def initialize_db(app):
                     threshold_at_prediction=value['threshold_at_prediction']
                 )
                 db.session.add(entry)
+            # Insert the new generated data for malware_ids 2–9
+            for entry in FEEDBACK_DATA:
+                feedback = MalwareFeedback(
+                    user_id=entry["user_id"],
+                    malware_id=entry["malware_id"],
+                    confidence=entry["confidence"],
+                    is_prediction_helpful=entry["is_prediction_helpful"],
+                    threshold_at_prediction=entry["threshold_at_prediction"]
+                )
+                db.session.add(feedback)
             db.session.commit()
+            print("Inserted all feedback data")
 
         else:
             print("Tables already exist.")
+
+
+def generate_feedback_data(user_id, malware_thresholds, entries_per_threshold=20):
+    feedbacks = []
+    for malware_id, thresholds in malware_thresholds.items():
+        for threshold in thresholds:
+            for _ in range(entries_per_threshold):
+                confidence = random.randint(70, 95)
+                is_helpful = random.choice([True, False])
+                feedbacks.append({
+                    "user_id": user_id,
+                    "malware_id": malware_id,
+                    "confidence": confidence,
+                    "is_prediction_helpful": is_helpful,
+                    "threshold_at_prediction": threshold
+                })
+    return feedbacks

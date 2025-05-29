@@ -94,3 +94,67 @@ def get_saved_feedbacks():
         return result 
     except Exception as e:
         return []
+    
+def recommended_threshold():
+    output = {}
+
+    for malware_id in range(1, 10):
+        result = {}  # moved inside the loop
+
+        thresholds, is_last_threshold_selected = MalwareFeedback.get_last_two_thresholds(malware_id)
+        print(f"for malware_id {malware_id} thresholds are {thresholds}, is the latest threshold selected? {is_last_threshold_selected} ")
+
+        if is_last_threshold_selected:
+            result["note"] = "Based on latest feedbacks"
+        else:
+            result["note"] = "Wait for latest recommendation until sufficient user feedbacks for new threshold is obtained"
+
+        # Skip if not enough thresholds
+        if len(thresholds) < 2 or thresholds[0] is None or thresholds[1] is None:
+            result["message"] = "Not enough valid thresholds to compare."
+            result["recommendation"] = "Cannot recommend update."
+            output[malware_id] = result
+            continue
+
+        first_threshold_score = get_feedback_score(thresholds[0], malware_id)
+        second_threshold_score = get_feedback_score(thresholds[1], malware_id)
+
+        if first_threshold_score > second_threshold_score:
+            result["message"] = f"Threshold {thresholds[0]}% is doing better than {thresholds[1]}%."
+            result["recommendation"] = f"Update threshold away from {thresholds[1]}% and closer to {thresholds[0]}%"
+        else:
+            result["message"] = f"Threshold {thresholds[1]}% is doing better than {thresholds[0]}%."
+            result["recommendation"] = f"Update threshold away from {thresholds[0]}% and closer to {thresholds[1]}%"
+
+        output[malware_id] = result
+
+    return output
+
+
+def get_feedback_score(threshold_confidence, malware_id):
+
+    # get all rows with threshold_confidence and malware_id from MalwareFeedback
+    # get sum of confidence * 1 if is_prediction_helpful and confidence * -1 if not is_prediction_helpful
+    # divide the above result by total number of rows
+    # return the value
+
+    if threshold_confidence is None:
+        return 0  # or handle as you wish
+
+    # Get all rows with this threshold and malware_id
+    rows = MalwareFeedback.query.filter_by(
+        malware_id=malware_id,
+        threshold_at_prediction=threshold_confidence
+    ).all()
+
+    if not rows:
+        return 0
+
+    score = 0
+    for row in rows:
+        # confidence * 1 if helpful, else * -1
+        score += row.confidence * (1 if row.is_prediction_helpful else -1)
+
+    # Average score
+    return score / len(rows)
+

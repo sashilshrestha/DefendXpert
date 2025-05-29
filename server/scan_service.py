@@ -118,9 +118,10 @@ def generate_indices(input):
 
 
 def map_prediction(predicted_confidence, malware_class):
-    malware_confidence = MalwareConfidence.query.get(malware_class)
-    if(malware_confidence.confidence < predicted_confidence): # (threshold : 55, prediction: 72)
-        return False, malware_confidence.confidence # is malware
+
+    malware_details = Malware.query.get(malware_class)
+    if(malware_details.confidence < predicted_confidence):  # (threshold : 55, prediction: 72)
+        return False, malware_details.confidence # is malware
     else:
-        return True, malware_confidence.confidence # not malware
+        return True, malware_details.confidence # not malware
 

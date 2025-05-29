@@ -4,8 +4,8 @@ from datetime import datetime
 import json
 import os
 from dotenv import load_dotenv
-from db.models import db, MalwareDetails, Malware, MalwareConfidence, User
-from db.constants import MALWARE_DETAILS, MALWARE_CLASSES, MALWARE_DESCRIPTIONS, MALWARE_THREAT_LEVELS, MALWARE_CONFIDENCE_SCORE,APPLICATION_USERS
+from db.models import db, MalwareDetails, Malware, MalwareConfidence, User, MalwareFeedback
+from db.constants import MALWARE_DETAILS, MALWARE_CLASSES, MALWARE_DESCRIPTIONS, MALWARE_THREAT_LEVELS, MALWARE_CONFIDENCE_SCORE,APPLICATION_USERS,FEEDBACK
 
 # load data from env 
 load_dotenv()
@@ -92,6 +92,22 @@ def initialize_db(app):
                     email=value['email'],
                     password_hash=value['password_hash'],
                     role=value['role']
+                )
+                db.session.add(entry)
+            db.session.commit()
+               
+        if 'malware_feedback' not in inspector.get_table_names():
+            print("Creating 'malware_feedback' table")
+            db.create_all()
+            for key, value in FEEDBACK.items():
+                
+                entry = MalwareFeedback(
+                    # id=key,
+                    user_id=value['user_id'],
+                    malware_id=value['malware_id'],
+                    confidence=value['confidence'],
+                    is_prediction_helpful=value['is_prediction_helpful'],
+                    threshold_at_prediction=value['threshold_at_prediction']
                 )
                 db.session.add(entry)
             db.session.commit()

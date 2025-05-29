@@ -38,3 +38,18 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<User {self.email}>"
+    
+
+class MalwareFeedback(db.Model):
+    __tablename__ = 'malware_feedback'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    malware_id = db.Column(db.Integer, nullable=False)
+    confidence = db.Column(db.Float, nullable=False)
+    is_prediction_helpful = db.Column(db.Boolean, nullable=False)
+    threshold_at_prediction = db.Column(db.Integer, nullable=False)
+    
+    @classmethod
+    def get_all(cls):
+        return cls.query.all()
